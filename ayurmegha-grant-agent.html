@@ -13,50 +13,69 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f9f8f6;
+    --bg: #f4f8f1;
     --surface: #ffffff;
-    --surface-2: #f4f3f0;
-    --border: rgba(0,0,0,0.09);
-    --border-strong: rgba(0,0,0,0.16);
-    --text-primary: #1a1a18;
-    --text-secondary: #5a5a56;
-    --text-muted: #9a9994;
-    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #97c459;
+    --surface-2: #edf4e7;
+    --border: rgba(39,90,20,0.12);
+    --border-strong: rgba(39,90,20,0.22);
+    --text-primary: #141f0e;
+    --text-secondary: #4a6040;
+    --text-muted: #8aaa78;
+    --green-bg: #e4f2d8; --green-text: #2d5c10; --green-border: #7db84a;
     --amber-bg: #faeeda; --amber-text: #854f0b; --amber-border: #ef9f27;
     --red-bg: #fcebeb;  --red-text: #a32d2d;  --red-border: #f09595;
     --blue-bg: #e6f1fb; --blue-text: #185fa5; --blue-border: #85b7eb;
-    --brand: #c96442;
+    --brand: #2d6e12;
+    --brand-light: #3d8f18;
     --radius: 8px;
     --font: 'Inter', system-ui, sans-serif;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1a1a18;
-      --surface: #242422;
-      --surface-2: #2c2c2a;
-      --border: rgba(255,255,255,0.09);
-      --border-strong: rgba(255,255,255,0.18);
-      --text-primary: #f0efe9;
-      --text-secondary: #a8a79f;
-      --text-muted: #6a6a64;
+      --bg: #0e160a;
+      --surface: #16201100;
+      --surface: #162011;
+      --surface-2: #1e2c17;
+      --border: rgba(150,210,100,0.12);
+      --border-strong: rgba(150,210,100,0.22);
+      --text-primary: #dff0d0;
+      --text-secondary: #9abb82;
+      --text-muted: #5a7a48;
       --green-bg: #173404; --green-text: #c0dd97; --green-border: #3b6d11;
       --amber-bg: #412402; --amber-text: #fac775; --amber-border: #854f0b;
       --red-bg: #501313;  --red-text: #f7c1c1;  --red-border: #a32d2d;
       --blue-bg: #042c53; --blue-text: #b5d4f4; --blue-border: #185fa5;
+      --brand: #4aad22;
+      --brand-light: #5cc42a;
     }
   }
 
   body {
     font-family: var(--font);
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='%232d6e12' fill-opacity='0.055'%3E%3C!-- leaf 1 top-left --%3E%3Cpath d='M 30 80 C 10 40 60 10 90 40 C 110 60 95 100 60 110 C 40 116 20 105 30 80 Z'/%3E%3Cpath d='M 30 80 Q 60 55 90 40' stroke='%232d6e12' stroke-opacity='0.055' stroke-width='1.5' fill='none'/%3E%3C!-- leaf 2 stem from leaf1 --%3E%3Cpath d='M 75 95 C 55 60 80 20 110 15 C 130 12 140 40 120 60 C 105 75 80 80 75 95 Z'/%3E%3Cpath d='M 75 95 Q 105 50 110 15' stroke='%232d6e12' stroke-opacity='0.055' stroke-width='1.5' fill='none'/%3E%3C!-- large leaf right side --%3E%3Cpath d='M 320 30 C 280 5 240 40 260 80 C 275 108 320 115 345 90 C 365 70 355 45 320 30 Z'/%3E%3Cpath d='M 320 30 Q 290 65 260 80' stroke='%232d6e12' stroke-opacity='0.055' stroke-width='1.5' fill='none'/%3E%3C!-- small leaf bottom right --%3E%3Cpath d='M 370 340 C 350 310 380 285 400 305 C 415 320 410 350 390 358 C 375 364 362 355 370 340 Z'/%3E%3Cpath d='M 370 340 Q 392 318 400 305' stroke='%232d6e12' stroke-opacity='0.055' stroke-width='1' fill='none'/%3E%3C!-- leaf bottom left --%3E%3Cpath d='M 20 350 C 5 320 35 295 58 315 C 75 330 68 360 45 368 C 28 374 15 365 20 350 Z'/%3E%3Cpath d='M 20 350 Q 48 320 58 315' stroke='%232d6e12' stroke-opacity='0.055' stroke-width='1' fill='none'/%3E%3C!-- center scatter leaf --%3E%3Cpath d='M 195 190 C 175 160 205 135 225 155 C 240 170 232 200 210 207 C 196 212 183 203 195 190 Z'/%3E%3Cpath d='M 195 190 Q 218 160 225 155' stroke='%232d6e12' stroke-opacity='0.055' stroke-width='1' fill='none'/%3E%3C!-- stem lines --%3E%3Cpath d='M 30 110 Q 60 160 50 220' stroke='%232d6e12' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M 370 110 Q 390 170 375 240' stroke='%232d6e12' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3C!-- tiny accent leaf top center --%3E%3Cpath d='M 200 25 C 188 8 210 0 220 12 C 228 22 220 38 207 40 C 198 42 192 34 200 25 Z'/%3E%3C!-- another leaf mid right --%3E%3Cpath d='M 390 200 C 368 175 390 150 408 168 C 422 182 416 210 398 216 C 385 220 375 212 390 200 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 420px 420px;
     color: var(--text-primary);
     min-height: 100vh;
     padding: 0;
+    position: relative;
+    overflow-x: hidden;
   }
 
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='%234aad22' fill-opacity='0.06'%3E%3Cpath d='M 30 80 C 10 40 60 10 90 40 C 110 60 95 100 60 110 C 40 116 20 105 30 80 Z'/%3E%3Cpath d='M 30 80 Q 60 55 90 40' stroke='%234aad22' stroke-opacity='0.06' stroke-width='1.5' fill='none'/%3E%3Cpath d='M 75 95 C 55 60 80 20 110 15 C 130 12 140 40 120 60 C 105 75 80 80 75 95 Z'/%3E%3Cpath d='M 75 95 Q 105 50 110 15' stroke='%234aad22' stroke-opacity='0.06' stroke-width='1.5' fill='none'/%3E%3Cpath d='M 320 30 C 280 5 240 40 260 80 C 275 108 320 115 345 90 C 365 70 355 45 320 30 Z'/%3E%3Cpath d='M 320 30 Q 290 65 260 80' stroke='%234aad22' stroke-opacity='0.06' stroke-width='1.5' fill='none'/%3E%3Cpath d='M 370 340 C 350 310 380 285 400 305 C 415 320 410 350 390 358 C 375 364 362 355 370 340 Z'/%3E%3Cpath d='M 370 340 Q 392 318 400 305' stroke='%234aad22' stroke-opacity='0.06' stroke-width='1' fill='none'/%3E%3Cpath d='M 20 350 C 5 320 35 295 58 315 C 75 330 68 360 45 368 C 28 374 15 365 20 350 Z'/%3E%3Cpath d='M 20 350 Q 48 320 58 315' stroke='%234aad22' stroke-opacity='0.06' stroke-width='1' fill='none'/%3E%3Cpath d='M 195 190 C 175 160 205 135 225 155 C 240 170 232 200 210 207 C 196 212 183 203 195 190 Z'/%3E%3Cpath d='M 195 190 Q 218 160 225 155' stroke='%234aad22' stroke-opacity='0.06' stroke-width='1' fill='none'/%3E%3Cpath d='M 30 110 Q 60 160 50 220' stroke='%234aad22' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M 370 110 Q 390 170 375 240' stroke='%234aad22' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M 200 25 C 188 8 210 0 220 12 C 228 22 220 38 207 40 C 198 42 192 34 200 25 Z'/%3E%3Cpath d='M 390 200 C 368 175 390 150 408 168 C 422 182 416 210 398 216 C 385 220 375 212 390 200 Z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+  }
+
+  .topbar, .container { position: relative; z-index: 1; }
+
   .topbar {
-    background: var(--surface);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 0.5px solid var(--border);
     padding: 0 2rem;
     display: flex;
@@ -66,6 +85,9 @@
     position: sticky;
     top: 0;
     z-index: 100;
+  }
+  @media (prefers-color-scheme: dark) {
+    .topbar { background: rgba(14,22,10,0.85); }
   }
   .topbar-left { display: flex; align-items: center; gap: 10px; }
   .topbar-logo {
@@ -185,9 +207,14 @@
 
   /* Grant card */
   .grant-card {
-    background: var(--surface); border: 0.5px solid var(--border);
+    background: rgba(255,255,255,0.88); border: 0.5px solid var(--border);
     border-radius: 12px; padding: 1.25rem; margin-bottom: 12px;
     transition: border-color 0.15s, box-shadow 0.15s;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  @media (prefers-color-scheme: dark) {
+    .grant-card { background: rgba(22,32,17,0.88); }
   }
   .grant-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
@@ -306,7 +333,7 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <div class="topbar-logo"><i class="ti ti-search"></i></div>
+    <div class="topbar-logo"><i class="ti ti-leaf"></i></div>
     <div>
       <div class="topbar-title">Grant Intelligence Agent</div>
       <div class="topbar-sub">Ayurmegha Research Labs</div>
@@ -626,7 +653,7 @@ Return at least 10 results. Sort by fitScore descending. Only include genuinely 
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8000,
+        max_tokens: 12000,
         system: systemPrompt,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: userPrompt }]
@@ -651,10 +678,32 @@ Return at least 10 results. Sort by fitScore descending. Only include genuinely 
 
     let grants = [];
     try {
-      const match = rawText.match(/\[[\s\S]*\]/);
-      if (match) grants = JSON.parse(match[0]);
-    } catch {
-      stream.textContent = 'Could not parse JSON from response.\n\n' + rawText;
+      // Strip markdown code fences if present
+      let cleaned = rawText
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
+
+      // Extract the JSON array (handles preamble text before/after)
+      const match = cleaned.match(/\[[\s\S]*\]/);
+      if (match) {
+        let jsonStr = match[0];
+        // If the array is truncated (response cut off mid-object), close it cleanly
+        try {
+          grants = JSON.parse(jsonStr);
+        } catch {
+          // Find last complete object ending with } and close the array
+          const lastClose = jsonStr.lastIndexOf('},');
+          if (lastClose !== -1) {
+            jsonStr = jsonStr.slice(0, lastClose + 1) + ']';
+            grants = JSON.parse(jsonStr);
+          } else {
+            throw new Error('Could not recover partial JSON');
+          }
+        }
+      }
+    } catch (e) {
+      stream.textContent = 'Could not parse results. Raw response:\n\n' + rawText;
       stream.classList.add('show');
       return;
     }
