@@ -313,11 +313,43 @@
   }
   .btn-secondary:hover { background: var(--surface-2); }
 
+  .share-btn {
+    font-family: var(--font); font-size: 12px; font-weight: 500;
+    padding: 5px 14px; border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface); color: var(--text-primary);
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .share-btn:hover { background: var(--surface-2); border-color: var(--brand); color: var(--brand); }
+  .share-btn i { font-size: 14px; }
+
+  .share-toast {
+    display: none; align-items: center; gap: 8px;
+    background: var(--green-bg); color: var(--green-text);
+    border: 0.5px solid var(--green-border);
+    border-radius: var(--radius); padding: 10px 14px;
+    font-size: 13px; margin-bottom: 12px;
+    animation: fadeIn 0.2s ease;
+  }
+  .share-toast.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Read-only view banner (shown when viewing a shared link) */
+  .shared-banner {
+    background: var(--blue-bg); color: var(--blue-text);
+    border: 0.5px solid var(--blue-border);
+    border-radius: var(--radius); padding: 10px 16px;
+    font-size: 13px; margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+
   /* Spin animation */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinning { animation: spin 1s linear infinite; display: inline-block; }
 
-  .last-run { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 1rem; }
+
 
   /* Divider */
   .divider { height: 0.5px; background: var(--border); margin: 1.5rem 0; }
@@ -412,13 +444,22 @@
   <div id="tabResults" style="display:none;">
     <div class="results-header">
       <h2 id="resultsTitle">No results yet</h2>
-      <div class="pills">
-        <button class="pill active" data-f="all" onclick="filterResults('all')">All</button>
-        <button class="pill" data-f="grant" onclick="filterResults('grant')">Grants</button>
-        <button class="pill" data-f="rfp" onclick="filterResults('rfp')">RFPs</button>
-        <button class="pill" data-f="accelerator" onclick="filterResults('accelerator')">Accelerators</button>
-        <button class="pill" data-f="patent" onclick="filterResults('patent')">Patent</button>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div class="pills">
+          <button class="pill active" data-f="all" onclick="filterResults('all')">All</button>
+          <button class="pill" data-f="grant" onclick="filterResults('grant')">Grants</button>
+          <button class="pill" data-f="rfp" onclick="filterResults('rfp')">RFPs</button>
+          <button class="pill" data-f="accelerator" onclick="filterResults('accelerator')">Accelerators</button>
+          <button class="pill" data-f="patent" onclick="filterResults('patent')">Patent</button>
+        </div>
+        <button class="share-btn" id="shareBtn" onclick="shareResults()" title="Share these results">
+          <i class="ti ti-share"></i> Share results
+        </button>
       </div>
+    </div>
+    <!-- Share toast -->
+    <div id="shareToast" class="share-toast">
+      <i class="ti ti-check"></i> Link copied — anyone with it can view these results
     </div>
     <div id="cardsArea"></div>
   </div>
@@ -820,22 +861,73 @@ function renderCards() {
   }).join('');
 }
 
-// ─── Restore cached results on load ──────────────────────────────────────
-const cached = localStorage.getItem('ag_results');
-const lastRun = localStorage.getItem('ag_lastrun');
-if (cached) {
+// ─── Share via URL hash ───────────────────────────────────────────────────
+function shareResults() {
+  if (!results.length) return;
   try {
-    results = JSON.parse(cached);
+    const json = JSON.stringify(results);
+    const compressed = btoa(encodeURIComponent(json));
+    const url = window.location.href.split('#')[0] + '#results=' + compressed;
+    navigator.clipboard.writeText(url).then(() => {
+      const toast = document.getElementById('shareToast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    });
+  } catch (e) {
+    alert('Could not generate share link: ' + e.message);
+  }
+}
+
+function loadFromHash() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#results=')) return;
+  try {
+    const compressed = hash.slice('#results='.length);
+    const json = decodeURIComponent(atob(compressed));
+    results = JSON.parse(json);
     renderCards();
+
     const badge = document.getElementById('resultCount');
     badge.textContent = results.length;
     badge.style.display = 'inline';
-    if (lastRun) {
-      const d = new Date(lastRun);
-      document.getElementById('lastRun').textContent =
-        `Last scanned: ${d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })} · ${d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })}`;
-    }
-  } catch {}
+
+    // Show read-only banner and switch to results tab
+    switchTab('results');
+    const banner = document.createElement('div');
+    banner.className = 'shared-banner';
+    banner.innerHTML = '<i class="ti ti-eye"></i> You\'re viewing a shared snapshot of grant results. Run a new scan to get the latest opportunities.';
+    document.getElementById('tabResults').insertBefore(banner, document.getElementById('tabResults').firstChild);
+
+    // Hide API prompt — not needed for view-only
+    document.getElementById('apiPrompt').style.display = 'none';
+    setStatus(false);
+    document.getElementById('statusText').textContent = 'View only';
+  } catch (e) {
+    console.warn('Could not load results from URL:', e);
+  }
+}
+
+
+// ─── On load: check URL hash first, then fall back to localStorage ────────
+loadFromHash();
+
+if (!results.length) {
+  const cached = localStorage.getItem('ag_results');
+  const lastRun = localStorage.getItem('ag_lastrun');
+  if (cached) {
+    try {
+      results = JSON.parse(cached);
+      renderCards();
+      const badge = document.getElementById('resultCount');
+      badge.textContent = results.length;
+      badge.style.display = 'inline';
+      if (lastRun) {
+        const d = new Date(lastRun);
+        document.getElementById('lastRun').textContent =
+          `Last scanned: ${d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })} · ${d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })}`;
+      }
+    } catch {}
+  }
 }
 </script>
 
