@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grant Intelligence Agent — Ayurmegha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f6;
+    --surface: #ffffff;
+    --surface-2: #f4f3f0;
+    --border: rgba(0,0,0,0.09);
+    --border-strong: rgba(0,0,0,0.16);
+    --text-primary: #1a1a18;
+    --text-secondary: #5a5a56;
+    --text-muted: #9a9994;
+    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #97c459;
+    --amber-bg: #faeeda; --amber-text: #854f0b; --amber-border: #ef9f27;
+    --red-bg: #fcebeb;  --red-text: #a32d2d;  --red-border: #f09595;
+    --blue-bg: #e6f1fb; --blue-text: #185fa5; --blue-border: #85b7eb;
+    --brand: #c96442;
+    --radius: 8px;
+    --font: 'Inter', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18;
+      --surface: #242422;
+      --surface-2: #2c2c2a;
+      --border: rgba(255,255,255,0.09);
+      --border-strong: rgba(255,255,255,0.18);
+      --text-primary: #f0efe9;
+      --text-secondary: #a8a79f;
+      --text-muted: #6a6a64;
+      --green-bg: #173404; --green-text: #c0dd97; --green-border: #3b6d11;
+      --amber-bg: #412402; --amber-text: #fac775; --amber-border: #854f0b;
+      --red-bg: #501313;  --red-text: #f7c1c1;  --red-border: #a32d2d;
+      --blue-bg: #042c53; --blue-text: #b5d4f4; --blue-border: #185fa5;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo {
+    width: 28px; height: 28px; background: var(--brand);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  }
+  .topbar-logo i { color: #fff; font-size: 16px; }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .topbar-sub { font-size: 12px; color: var(--text-muted); }
+  .topbar-badge {
+    font-size: 11px; font-weight: 500; padding: 2px 8px;
+    border-radius: 20px; background: var(--green-bg); color: var(--green-text);
+    border: 0.5px solid var(--green-border);
+  }
+  .api-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-border); }
+  .dot.red { background: var(--red-border); }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* API Key prompt */
+  .api-prompt {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .api-prompt h2 { font-size: 16px; font-weight: 500; }
+  .api-prompt p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .api-prompt-row { display: flex; gap: 8px; }
+  .api-prompt-row input { flex: 1; font-family: var(--font); font-size: 13px; padding: 8px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary); }
+  .api-prompt-row input:focus { outline: none; border-color: var(--brand); }
+  .btn-brand {
+    background: var(--brand); color: #fff; border: none;
+    font-family: var(--font); font-size: 13px; font-weight: 500;
+    padding: 8px 20px; border-radius: var(--radius); cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-brand:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-brand:hover:not(:disabled) { opacity: 0.88; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 1.5rem; }
+  .tab {
+    font-family: var(--font); font-size: 13px; padding: 10px 18px;
+    color: var(--text-secondary); border: none; background: none; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab.active { color: var(--text-primary); border-bottom-color: var(--brand); font-weight: 500; }
+
+  /* Controls */
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .ctrl-group label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+  .ctrl-group select {
+    width: 100%; font-family: var(--font); font-size: 13px;
+    padding: 8px 10px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius); background: var(--surface); color: var(--text-primary);
+    cursor: pointer;
+  }
+  .ctrl-group select:focus { outline: none; border-color: var(--brand); }
+  .scan-btn {
+    grid-column: 1 / -1;
+    background: var(--brand); color: #fff; border: none;
+    font-family: var(--font); font-size: 14px; font-weight: 500;
+    padding: 11px; border-radius: var(--radius); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity 0.15s;
+  }
+  .scan-btn:hover:not(:disabled) { opacity: 0.88; }
+  .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Progress */
+  .progress-wrap {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; display: none;
+  }
+  .progress-wrap.show { display: block; }
+  .progress-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .progress-track { height: 3px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--brand); border-radius: 2px; transition: width 0.6s ease; }
+
+  /* Stream */
+  .stream {
+    background: var(--surface-2); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
+    font-size: 12px; color: var(--text-secondary); line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word;
+    max-height: 200px; overflow-y: auto; display: none;
+    font-family: 'Courier New', monospace;
+  }
+  .stream.show { display: block; }
+
+  /* Results */
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;
+  }
+  .results-header h2 { font-size: 15px; font-weight: 500; }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    font-size: 11px; padding: 4px 10px; border-radius: 20px;
+    border: 0.5px solid var(--border); background: var(--surface-2);
+    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+    font-family: var(--font);
+  }
+  .pill.active { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+
+  /* Grant card */
+  .grant-card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 1.25rem; margin-bottom: 12px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .grant-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .card-title { font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--text-primary); }
+  .card-org { font-size: 12px; color: var(--text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+  .badge {
+    font-size: 10px; font-weight: 500; padding: 2px 7px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .badge-grant  { background: var(--green-bg); color: var(--green-text); border: 0.5px solid var(--green-border); }
+  .badge-rfp    { background: var(--amber-bg); color: var(--amber-text); border: 0.5px solid var(--amber-border); }
+  .badge-accelerator { background: var(--blue-bg); color: var(--blue-text); border: 0.5px solid var(--blue-border); }
+  .badge-patent { background: var(--surface-2); color: var(--text-secondary); border: 0.5px solid var(--border-strong); }
+
+  .fit-ring {
+    flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+  }
+  .fit-high { background: var(--green-bg); color: var(--green-text); }
+  .fit-mid  { background: var(--amber-bg); color: var(--amber-text); }
+  .fit-low  { background: var(--red-bg);   color: var(--red-text);   }
+
+  .card-meta { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+  .meta { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+  .meta i { font-size: 14px; }
+
+  .section-label {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;
+  }
+  .section-body { font-size: 13px; color: var(--text-primary); line-height: 1.65; margin-bottom: 12px; }
+
+  .gap-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .gap-item {
+    font-size: 12px; padding: 5px 10px; border-radius: var(--radius);
+    border-left: 2px solid; display: flex; align-items: flex-start; gap: 7px; line-height: 1.5;
+  }
+  .gap-have { border-color: var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .gap-need { border-color: var(--red-border);   background: var(--red-bg);   color: var(--red-text);   }
+  .gap-item i { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px; border-top: 0.5px solid var(--border); flex-wrap: wrap; gap: 8px;
+  }
+  .deadline { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+  .deadline.urgent { color: var(--red-text); }
+  .deadline.ok { color: var(--text-secondary); }
+  .apply-link {
+    font-size: 12px; padding: 5px 14px; border: 0.5px solid var(--blue-border);
+    border-radius: var(--radius); color: var(--blue-text); text-decoration: none;
+    background: var(--blue-bg); transition: opacity 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .apply-link:hover { opacity: 0.8; }
+
+  /* Empty / error states */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+  .empty i { font-size: 36px; display: block; margin-bottom: 10px; }
+  .empty p { font-size: 14px; line-height: 1.6; }
+
+  /* Settings */
+  .setting-section { margin-bottom: 1.5rem; }
+  .setting-section label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 4px; }
+  .setting-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+  textarea {
+    width: 100%; font-family: var(--font); font-size: 13px;
+    padding: 10px 12px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary);
+    resize: vertical; line-height: 1.6;
+  }
+  textarea:focus { outline: none; border-color: var(--brand); }
+  .tag-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .tag {
+    font-size: 12px; padding: 3px 10px; border-radius: 20px;
+    background: var(--surface-2); border: 0.5px solid var(--border);
+    color: var(--text-primary); display: flex; align-items: center; gap: 5px;
+  }
+  .tag button { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 11px; padding: 0; line-height: 1; }
+  .tag button:hover { color: var(--red-text); }
+  .add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .add-row input {
+    flex: 1; font-family: var(--font); font-size: 13px;
+    padding: 7px 10px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary);
+  }
+  .add-row input:focus { outline: none; border-color: var(--brand); }
+  .btn-secondary {
+    font-family: var(--font); font-size: 13px;
+    padding: 7px 16px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius); background: var(--surface);
+    color: var(--text-primary); cursor: pointer; transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: var(--surface-2); }
+
+  /* Spin animation */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinning { animation: spin 1s linear infinite; display: inline-block; }
+
+  .last-run { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 1rem; }
+
+  /* Divider */
+  .divider { height: 0.5px; background: var(--border); margin: 1.5rem 0; }
+
+  @media (max-width: 600px) {
+    .controls { grid-template-columns: 1fr; }
+    .topbar { padding: 0 1rem; }
+    .container { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo"><i class="ti ti-search"></i></div>
+    <div>
+      <div class="topbar-title">Grant Intelligence Agent</div>
+      <div class="topbar-sub">Ayurmegha Research Labs</div>
+    </div>
+    <span class="topbar-badge">AI + Ayurveda</span>
+  </div>
+  <div class="api-status">
+    <div class="dot" id="statusDot"></div>
+    <span id="statusText">Enter API key</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- API Key entry -->
+  <div class="api-prompt" id="apiPrompt">
+    <h2>Connect to Claude</h2>
+    <p>This tool uses the Claude API (with web search) to scan funding databases in real time. Enter your Anthropic API key below — it stays in your browser and is never stored on any server.</p>
+    <div class="api-prompt-row">
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" />
+      <button class="btn-brand" onclick="saveApiKey()"><i class="ti ti-plug"></i> Connect</button>
+    </div>
+    <p style="font-size:11px; color: var(--text-muted);">Get your key at <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color: var(--blue-text);">console.anthropic.com</a>. Key is stored in localStorage only.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('scan')">Scan</button>
+    <button class="tab" onclick="switchTab('results')" id="resultsTab">Results <span id="resultCount" style="display:none; font-size:11px; background:var(--green-bg); color:var(--green-text); border-radius:20px; padding:1px 6px; margin-left:4px;"></span></button>
+    <button class="tab" onclick="switchTab('settings')">Profile &amp; settings</button>
+  </div>
+
+  <!-- SCAN TAB -->
+  <div id="tabScan">
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>Search depth</label>
+        <select id="depth">
+          <option value="quick">Quick (5–10 sources)</option>
+          <option value="deep" selected>Deep (20+ sources)</option>
+          <option value="exhaustive">Exhaustive (all domains)</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label>Category</label>
+        <select id="category">
+          <option value="all">All categories</option>
+          <option value="grant">Grants only</option>
+          <option value="rfp">RFPs / tenders</option>
+          <option value="accelerator">Accelerators</option>
+          <option value="patent">Patent calls</option>
+        </select>
+      </div>
+      <button class="scan-btn" id="scanBtn" onclick="runScan()">
+        <i class="ti ti-radar" id="scanIcon"></i>
+        <span id="scanLabel">Scan for opportunities</span>
+      </button>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label" id="progressLabel">Initialising search...</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="stream" id="stream"></div>
+
+    <div class="empty">
+      <i class="ti ti-telescope"></i>
+      <p>Run a scan to find active grants, RFPs, accelerators, and patent calls matched to Ayurmegha's profile across BIRAC, DST, ANRF, NIH, Wellcome, Ministry of AYUSH, EU Horizon, and more.</p>
+    </div>
+
+    <div class="last-run" id="lastRun"></div>
+  </div>
+
+  <!-- RESULTS TAB -->
+  <div id="tabResults" style="display:none;">
+    <div class="results-header">
+      <h2 id="resultsTitle">No results yet</h2>
+      <div class="pills">
+        <button class="pill active" data-f="all" onclick="filterResults('all')">All</button>
+        <button class="pill" data-f="grant" onclick="filterResults('grant')">Grants</button>
+        <button class="pill" data-f="rfp" onclick="filterResults('rfp')">RFPs</button>
+        <button class="pill" data-f="accelerator" onclick="filterResults('accelerator')">Accelerators</button>
+        <button class="pill" data-f="patent" onclick="filterResults('patent')">Patent</button>
+      </div>
+    </div>
+    <div id="cardsArea"></div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="tabSettings" style="display:none;">
+    <div class="setting-section">
+      <label>Organisation profile</label>
+      <textarea id="orgProfile" rows="6">Ayurmegha Research Labs is an Ayurvedic telehealth and research organisation building Brahma — a Salesforce-based AI-powered care delivery portal for Ayurvedic practitioners and patients. Focus areas: AI in Ayurveda, digital health infrastructure, traditional medicine digitisation, BIRAC/DST-eligible biotech, LLM-powered clinical workflows, Prakriti analysis, and personalised care plans. Academic partnerships: CCMB Hyderabad, DPU Pune (Dr. Asmita Wele, Co-PI). Targeting: BIRAC BioE3 Bio-AI grant, ANRF Centre of Excellence for Ayurveda Foundation Model (AFM).</textarea>
+      <div class="setting-hint">This drives how Claude scores fit and identifies gaps for each opportunity found.</div>
+    </div>
+
+    <div class="setting-section">
+      <label>What we already have</label>
+      <textarea id="assetsProfile" rows="5">Working Brahma portal (Salesforce LWC + Apex, Experience Cloud), CCMB and DPU Pune as academic collaborators, Prakriti quiz + AI-generated care plan system, telehealth appointment booking, BIRAC BioE3 draft proposal in progress, USA/UK clinic network via Bhamaveda, Shopify-integrated Ayurvedic e-commerce, clinical data collection pipeline, institutional letterhead and research entity status.</textarea>
+      <div class="setting-hint">Used to populate "we have ✓" for each card, so you know your starting position immediately.</div>
+    </div>
+
+    <div class="setting-section">
+      <label>Priority search domains</label>
+      <div class="tag-wrap" id="domainTags"></div>
+      <div class="add-row">
+        <input type="text" id="newDomain" placeholder="e.g. ipr.gov.in" onkeydown="if(event.key==='Enter')addDomain()" />
+        <button class="btn-secondary" onclick="addDomain()">Add</button>
+      </div>
+      <div class="setting-hint">Claude searches these first, then branches out to global databases.</div>
+    </div>
+
+    <div class="divider"></div>
+    <button class="btn-brand" onclick="saveSettings()"><i class="ti ti-device-floppy"></i> Save settings</button>
+    <span id="saveMsg" style="font-size:12px; color:var(--green-text); margin-left:10px; display:none;">Saved!</span>
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('ag_apikey') || '';
+let results = [];
+let activeFilter = 'all';
+
+const DEFAULT_DOMAINS = [
+  'birac.nic.in','dst.gov.in','anrf.gov.in','wellcome.org',
+  'grants.nih.gov','ipr.gov.in','startupindia.gov.in','meity.gov.in',
+  'ayush.gov.in','niti.gov.in','tdb.gov.in','icmr.gov.in'
+];
+
+const DEFAULT_ORG = document.getElementById('orgProfile').value;
+const DEFAULT_ASSETS = document.getElementById('assetsProfile').value;
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
+  if (apiKey) {
+    document.getElementById('apiPrompt').style.display = 'none';
+    setStatus(true);
+  }
+  renderDomainTags();
+});
+
+// ─── API Key ──────────────────────────────────────────────────────────────
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val.startsWith('sk-ant')) { alert('Key should start with sk-ant-api03-…'); return; }
+  apiKey = val;
+  localStorage.setItem('ag_apikey', val);
+  document.getElementById('apiPrompt').style.display = 'none';
+  setStatus(true);
+}
+
+function setStatus(ok) {
+  document.getElementById('statusDot').className = 'dot' + (ok ? '' : ' red');
+  document.getElementById('statusText').textContent = ok ? 'Connected' : 'No API key';
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  ['scan','results','settings'].forEach(id => {
+    document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1)).style.display = 'none';
+  });
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+
+  const map = { scan: 'tabScan', results: 'tabResults', settings: 'tabSettings' };
+  document.getElementById(map[t]).style.display = 'block';
+  document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active');
+}
+
+// ─── Domain tags ──────────────────────────────────────────────────────────
+function getDomains() {
+  return JSON.parse(localStorage.getItem('ag_domains') || 'null') || [...DEFAULT_DOMAINS];
+}
+function saveDomains(arr) { localStorage.setItem('ag_domains', JSON.stringify(arr)); }
+
+function renderDomainTags() {
+  const wrap = document.getElementById('domainTags');
+  wrap.innerHTML = '';
+  getDomains().forEach(d => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.innerHTML = `${d} <button onclick="removeDomain('${d}')" title="Remove"><i class="ti ti-x"></i></button>`;
+    wrap.appendChild(span);
+  });
+}
+function addDomain() {
+  const inp = document.getElementById('newDomain');
+  const v = inp.value.trim();
+  if (!v) return;
+  const arr = getDomains();
+  if (!arr.includes(v)) { arr.push(v); saveDomains(arr); renderDomainTags(); }
+  inp.value = '';
+}
+function removeDomain(d) {
+  const arr = getDomains().filter(x => x !== d);
+  saveDomains(arr);
+  renderDomainTags();
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────
+function loadSettings() {
+  const s = JSON.parse(localStorage.getItem('ag_settings') || '{}');
+  if (s.org) document.getElementById('orgProfile').value = s.org;
+  if (s.assets) document.getElementById('assetsProfile').value = s.assets;
+}
+function saveSettings() {
+  localStorage.setItem('ag_settings', JSON.stringify({
+    org: document.getElementById('orgProfile').value,
+    assets: document.getElementById('assetsProfile').value
+  }));
+  const msg = document.getElementById('saveMsg');
+  msg.style.display = 'inline';
+  setTimeout(() => msg.style.display = 'none', 2000);
+}
+
+// ─── Scan ─────────────────────────────────────────────────────────────────
+async function runScan() {
+  if (!apiKey) {
+    document.getElementById('apiPrompt').style.display = 'block';
+    document.getElementById('apiPrompt').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  const btn = document.getElementById('scanBtn');
+  const icon = document.getElementById('scanIcon');
+  const label = document.getElementById('scanLabel');
+  const bar = document.getElementById('progressWrap');
+  const fill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  const stream = document.getElementById('stream');
+
+  btn.disabled = true;
+  icon.className = 'ti ti-loader spinning';
+  label.textContent = 'Scanning...';
+  bar.classList.add('show');
+  stream.className = 'stream show';
+  stream.textContent = '';
+
+  const steps = [
+    [8,  'Connecting to BIRAC, ANRF, DST portals...'],
+    [20, 'Scanning Ministry of AYUSH and DBT schemes...'],
+    [32, 'Searching NIH NCCIH, Wellcome Trust, BMGF...'],
+    [45, 'Checking EU Horizon Health, Innovate UK...'],
+    [56, 'Scanning Startup India, TIDE 2.0, Atal Innovation...'],
+    [67, 'Looking at traditional medicine and patent programs...'],
+    [78, 'Searching international health AI accelerators...'],
+    [88, 'Scoring fit against Ayurmegha profile...'],
+    [95, 'Compiling results...']
+  ];
+  let si = 0;
+  const ticker = setInterval(() => {
+    if (si < steps.length) {
+      fill.style.width = steps[si][0] + '%';
+      progressLabel.textContent = steps[si][1];
+      stream.textContent += (si > 0 ? '\n' : '') + '→ ' + steps[si][1];
+      stream.scrollTop = stream.scrollHeight;
+      si++;
+    }
+  }, 1600);
+
+  const org = document.getElementById('orgProfile').value;
+  const assets = document.getElementById('assetsProfile').value;
+  const depth = document.getElementById('depth').value;
+  const cat = document.getElementById('category').value;
+  const domains = getDomains().join(', ');
+
+  const systemPrompt = `You are a grant intelligence agent specialising in funding for health AI, digital health, traditional medicine, and Ayurveda research. You have web search access. Search extensively and return results in the exact JSON format requested. Be thorough, accurate, and current — only include opportunities that are genuinely open or upcoming, not past deadlines.`;
+
+  const userPrompt = `Find ALL currently active or upcoming grants, RFPs, accelerator programs, patent calls, and research funding opportunities for this organisation.
+
+ORGANISATION: ${org}
+
+EXISTING ASSETS: ${assets}
+
+SEARCH DEPTH: ${depth}
+CATEGORY FILTER: ${cat}
+PRIORITY DOMAINS TO CHECK: ${domains}
+
+Search across ALL of the following and more:
+- India: BIRAC (BioE3, BIPP, SBIRI, SPARK), DST (SERB, NIDHI, RESPOND), ANRF CoE, DBT, ICMR, MEITY (TIDE 2.0), Ministry of AYUSH, CCMB, Startup India, Atal Innovation Mission, TDB, NHM digital health
+- International: NIH (NCCIH traditional medicine grants, NIA, ODP), Wellcome Trust (Science & Society, digital health), Bill & Melinda Gates Foundation, WHO SEARO, Rockefeller Foundation, Skoll Foundation
+- EU/UK: Horizon Europe (Health cluster), Innovate UK, UKRI, ERC
+- Accelerators: Y Combinator (health), Google for Startups (health AI), Microsoft for Startups, AWS Healthcare, NASSCOM DeepTech, FICCI health programs, 100x.vc, Kalaari Capital grants
+- IP programs: Office of CGPDTM (India patent support), CSIR-TKDL, Startup IP advantage scheme
+- Any open calls mentioning: Ayurveda AI, traditional medicine digitisation, Prakriti, personalised medicine, telehealth in LMIC, clinical NLP, health data platforms, digital therapeutics
+
+Return a JSON array ONLY (no markdown, no preamble, no extra text). Each object must have:
+{
+  "title": "Full name of the grant/program",
+  "org": "Funding body name",
+  "category": "grant" | "rfp" | "accelerator" | "patent",
+  "amount": "Amount or range e.g. ₹2–5 Cr or $500K or Not disclosed",
+  "geo": "India / Global / India + International",
+  "stage": "Who is eligible e.g. Startup + Research institute",
+  "description": "2–3 sentences describing what this funds specifically",
+  "requirements": "2–3 sentences on eligibility, co-PI requirements, documentation needed",
+  "have": ["3–5 things from our assets that match this grant's requirements"],
+  "need": ["3–5 specific gaps we must fill to apply successfully"],
+  "deadline": "Date string e.g. 30 Sep 2025 or Rolling or Q4 2025 — check the site",
+  "url": "Direct URL to apply or learn more",
+  "fitScore": 0-100
+}
+
+Return at least 10 results. Sort by fitScore descending. Only include genuinely open opportunities.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
+        system: systemPrompt,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await res.json();
+    clearInterval(ticker);
+    fill.style.width = '100%';
+    progressLabel.textContent = 'Done. Parsing results...';
+
+    if (data.error) {
+      stream.textContent = 'API error: ' + JSON.stringify(data.error);
+      stream.classList.add('show');
+      return;
+    }
+
+    let rawText = '';
+    for (const block of (data.content || [])) {
+      if (block.type === 'text') rawText += block.text;
+    }
+
+    let grants = [];
+    try {
+      const match = rawText.match(/\[[\s\S]*\]/);
+      if (match) grants = JSON.parse(match[0]);
+    } catch {
+      stream.textContent = 'Could not parse JSON from response.\n\n' + rawText;
+      stream.classList.add('show');
+      return;
+    }
+
+    stream.classList.remove('show');
+    results = grants;
+    renderCards();
+
+    // Update results tab badge
+    const badge = document.getElementById('resultCount');
+    badge.textContent = grants.length;
+    badge.style.display = 'inline';
+
+    // Auto-switch to results
+    switchTab('results');
+
+    const now = new Date();
+    document.getElementById('lastRun').textContent =
+      `Last scanned: ${now.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })} · ${now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })}`;
+
+    localStorage.setItem('ag_results', JSON.stringify(grants));
+    localStorage.setItem('ag_lastrun', now.toISOString());
+
+  } catch (err) {
+    clearInterval(ticker);
+    stream.textContent = 'Network error: ' + err.message + '\n\nMake sure your API key has web search access enabled.';
+    stream.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    icon.className = 'ti ti-radar';
+    label.textContent = 'Scan again';
+    setTimeout(() => {
+      fill.style.width = '0%';
+      bar.classList.remove('show');
+    }, 2000);
+  }
+}
+
+// ─── Results rendering ────────────────────────────────────────────────────
+function filterResults(f) {
+  activeFilter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.f === f));
+  renderCards();
+}
+
+function renderCards() {
+  const area = document.getElementById('cardsArea');
+  const title = document.getElementById('resultsTitle');
+  const filtered = activeFilter === 'all'
+    ? results
+    : results.filter(g => g.category === activeFilter);
+
+  const sorted = [...filtered].sort((a, b) => b.fitScore - a.fitScore);
+
+  title.textContent = sorted.length + ' opportunit' + (sorted.length === 1 ? 'y' : 'ies') + ' found';
+
+  if (!sorted.length) {
+    area.innerHTML = `<div class="empty"><i class="ti ti-search-off"></i><p>No results for this filter.</p></div>`;
+    return;
+  }
+
+  area.innerHTML = sorted.map(g => {
+    const fc = g.fitScore >= 80 ? 'fit-high' : g.fitScore >= 55 ? 'fit-mid' : 'fit-low';
+    const bc = { grant:'badge-grant', rfp:'badge-rfp', accelerator:'badge-accelerator', patent:'badge-patent' }[g.category] || 'badge-patent';
+
+    const urgency = (() => {
+      if (!g.deadline || g.deadline === 'Rolling') return 'ok';
+      try {
+        const d = new Date(g.deadline);
+        return isNaN(d) ? 'ok' : (d - new Date()) / 86400000 < 75 ? 'urgent' : 'ok';
+      } catch { return 'ok'; }
+    })();
+
+    const haveHtml = (g.have || []).map(h =>
+      `<div class="gap-item gap-have"><i class="ti ti-check"></i>${h}</div>`).join('');
+    const needHtml = (g.need || []).map(n =>
+      `<div class="gap-item gap-need"><i class="ti ti-alert-triangle"></i>${n}</div>`).join('');
+
+    return `<div class="grant-card">
+      <div class="card-top">
+        <div style="flex:1">
+          <div class="card-title">${g.title}</div>
+          <div class="card-org">
+            ${g.org}
+            <span class="badge ${bc}">${g.category}</span>
+          </div>
+        </div>
+        <div class="fit-ring ${fc}" title="Fit score: ${g.fitScore}%">${g.fitScore}%</div>
+      </div>
+
+      <div class="card-meta">
+        ${g.amount ? `<div class="meta"><i class="ti ti-coins"></i>${g.amount}</div>` : ''}
+        ${g.geo ? `<div class="meta"><i class="ti ti-map-pin"></i>${g.geo}</div>` : ''}
+        ${g.stage ? `<div class="meta"><i class="ti ti-building"></i>${g.stage}</div>` : ''}
+      </div>
+
+      <div class="section-label">What it funds</div>
+      <div class="section-body">${g.description}</div>
+
+      <div class="section-label">Key requirements</div>
+      <div class="section-body">${g.requirements}</div>
+
+      <div class="section-label">We have ↔ we need</div>
+      <div class="gap-list">${haveHtml}${needHtml}</div>
+
+      <div class="card-footer">
+        <div class="deadline ${urgency}">
+          <i class="ti ti-calendar-event"></i>
+          Deadline: ${g.deadline || 'Check site'}
+        </div>
+        ${g.url ? `<a href="${g.url}" target="_blank" class="apply-link">Apply <i class="ti ti-external-link" style="font-size:11px"></i></a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Restore cached results on load ──────────────────────────────────────
+const cached = localStorage.getItem('ag_results');
+const lastRun = localStorage.getItem('ag_lastrun');
+if (cached) {
+  try {
+    results = JSON.parse(cached);
+    renderCards();
+    const badge = document.getElementById('resultCount');
+    badge.textContent = results.length;
+    badge.style.display = 'inline';
+    if (lastRun) {
+      const d = new Date(lastRun);
+      document.getElementById('lastRun').textContent =
+        `Last scanned: ${d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })} · ${d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })}`;
+    }
+  } catch {}
+}
+</script>
+
+</body>
+</html>
