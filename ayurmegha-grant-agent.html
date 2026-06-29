@@ -192,8 +192,8 @@
 
   /* Results */
   .results-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;
+    display: flex; flex-direction: column;
+    margin-bottom: 1rem;
   }
   .results-header h2 { font-size: 15px; font-weight: 500; }
   .pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -443,18 +443,18 @@
   <!-- RESULTS TAB -->
   <div id="tabResults" style="display:none;">
     <div class="results-header">
-      <h2 id="resultsTitle">No results yet</h2>
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <div class="pills">
-          <button class="pill active" data-f="all" onclick="filterResults('all')">All</button>
-          <button class="pill" data-f="grant" onclick="filterResults('grant')">Grants</button>
-          <button class="pill" data-f="rfp" onclick="filterResults('rfp')">RFPs</button>
-          <button class="pill" data-f="accelerator" onclick="filterResults('accelerator')">Accelerators</button>
-          <button class="pill" data-f="patent" onclick="filterResults('patent')">Patent</button>
-        </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:12px; flex-wrap:wrap;">
+        <h2 id="resultsTitle">No results yet</h2>
         <button class="share-btn" id="shareBtn" onclick="shareResults()" title="Share these results">
           <i class="ti ti-share"></i> Share results
         </button>
+      </div>
+      <div class="pills" style="margin-top:10px;">
+        <button class="pill active" data-f="all" onclick="filterResults('all')">All</button>
+        <button class="pill" data-f="grant" onclick="filterResults('grant')">Grants</button>
+        <button class="pill" data-f="rfp" onclick="filterResults('rfp')">RFPs</button>
+        <button class="pill" data-f="accelerator" onclick="filterResults('accelerator')">Accelerators</button>
+        <button class="pill" data-f="patent" onclick="filterResults('patent')">Patent</button>
       </div>
     </div>
     <!-- Share toast -->
